@@ -6,7 +6,7 @@ module.exports.config = {
   permission: 0,
   credits: "RiisHaD SoBuJ",
   description: "Send continuous mojadar Bangla gali",
-  prefix: true,  // এখানে prefix true করা হলো
+  prefix: true,
   category: "fun",
   usages: "fungali @mention",
   cooldowns: 5,
@@ -111,19 +111,33 @@ const fungaliList = [
   "তোর মশারিতে ভূত রাখি",
   "তোর জামাকাপড়ে কাঁঠালের রস ঢালি",
   "তোর কানের লতিতে চিপস ঢুকাই",
-  "তোর আইডিতে ধান গাছ লাগাই"
+  "তোর আইডিতে ধান গাছ লাগাই",
+  "তোর গলার গোড়ায় চামড়ার ট্যাংকি লাগাই",
+  "তোর মুখে মরিচের ঝাঁজ লেগে আছে",
+  "তোর ফোনে সিগন্যাল নাই, তোর মনেরও নাই",
+  "তোর জামার ফাঁকে পিঁপড়ার রাজত্ব",
+  "তোর পেটের ভিতর পেঁপে ফলছে",
+  "তোর দাড়িতে কাঁচা মরিচ গুঁজে দেই",
+  "তোর স্যান্ডেল দিয়ে রাস্তা সাফ করি",
+  "তোর মাথায় কাকুতি জ্বালাই",
+  "তোর দোতলায় গরুর গোবর জমে আছে",
+  "তোর কলিজায় ইঁদুর দৌড়ায়",
+  "তোর চোখে পানি, মগজে পানি",
+  "তোর মুখে ফুলে ফোটা বাতাস",
+  "তোর খাটে মাছের বদলে পাথর পড়বে",
+  "তোর হাটে বিক্রি হয় গলির চাহিদা",
 ];
 
 module.exports.run = async function({ api, event, args }) {
-  const { threadID, messageID, senderID, mentions, body } = event;
+  const { threadID, messageID, mentions, body } = event;
 
-  if (body && body.toLowerCase().includes("stop fungali")) {
+  if (body && body.toLowerCase() === "stop fungali") {
     if (activeFungalis[threadID]) {
       clearInterval(activeFungalis[threadID]);
       delete activeFungalis[threadID];
       return api.sendMessage("🛑 গালি বন্ধ করা হলো!", threadID, messageID);
     } else {
-      return api.sendMessage("⚠️ কোন গালি চালানো হয় নাই!", threadID, messageID);
+      return api.sendMessage("❌ কোন গালি চলছে না।", threadID, messageID);
     }
   }
 
@@ -137,13 +151,13 @@ module.exports.run = async function({ api, event, args }) {
 
   const targetID = Object.keys(mentions)[0];
   const targetName = mentions[targetID];
-  let index = 0;
 
+  let index = 0;
   activeFungalis[threadID] = setInterval(() => {
     if (index >= fungaliList.length) {
       clearInterval(activeFungalis[threadID]);
       delete activeFungalis[threadID];
-      return api.sendMessage(`😈 গালি শেষ হলো! ${targetName} ভাইয়ে পাঠানো হলো!`, threadID);
+      return api.sendMessage(`😈 গালি শেষ! ${targetName} ভাইয়ে পাঠানো হলো!`, threadID);
     }
 
     api.sendMessage({
@@ -152,5 +166,5 @@ module.exports.run = async function({ api, event, args }) {
     }, threadID);
 
     index++;
-  }, 300); // প্রতি 0.3 সেকেন্ডে মেসেজ যাবে
+  }, 300);
 };
