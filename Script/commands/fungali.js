@@ -1,12 +1,14 @@
+let activeFungalis = {};
+
 module.exports.config = {
   name: "fungali",
   version: "1.0.0",
   permission: 0,
   credits: "RiisHaD SoBuJ",
   description: "Send continuous mojadar Bangla gali",
-  prefix: false,
+  prefix: true,  // এখানে prefix true করা হলো
   category: "fun",
-  usages: "@mention",
+  usages: "fungali @mention",
   cooldowns: 5,
 };
 
@@ -112,44 +114,43 @@ const fungaliList = [
   "তোর আইডিতে ধান গাছ লাগাই"
 ];
 
-const activeThreads = new Map();
+module.exports.run = async function({ api, event, args }) {
+  const { threadID, messageID, senderID, mentions, body } = event;
 
-module.exports.run = async function ({ api, event, args }) {
-  const { threadID, messageID, mentions } = event;
-
-  if (args[0] === "stop") {
-    if (activeThreads.has(threadID)) {
-      clearInterval(activeThreads.get(threadID));
-      activeThreads.delete(threadID);
-      return api.sendMessage("🛑 Gali চালানো বন্ধ করা হলো।", threadID, messageID);
+  if (body && body.toLowerCase().includes("stop fungali")) {
+    if (activeFungalis[threadID]) {
+      clearInterval(activeFungalis[threadID]);
+      delete activeFungalis[threadID];
+      return api.sendMessage("🛑 গালি বন্ধ করা হলো!", threadID, messageID);
     } else {
-      return api.sendMessage("❌ কোন গালি চালানো হয় নাই।", threadID, messageID);
+      return api.sendMessage("⚠️ কোন গালি চালানো হয় নাই!", threadID, messageID);
     }
   }
 
-  if (!Object.keys(mentions).length) {
-    return api.sendMessage("⚠️ কাউকে মেনশন করো।", threadID, messageID);
+  if (!mentions || Object.keys(mentions).length === 0) {
+    return api.sendMessage("⚠️ দয়া করে কাউকে @mention করো!", threadID, messageID);
   }
 
-  const mentionID = Object.keys(mentions)[0];
-  const mentionName = mentions[mentionID];
-  let count = 0;
+  if (activeFungalis[threadID]) {
+    return api.sendMessage("⏳ আগের গালি চলছে, আগে সেটা বন্ধ করো 'stop fungali' দিয়ে!", threadID, messageID);
+  }
 
-  const interval = setInterval(() => {
-    if (count >= fungaliList.length) {
-      clearInterval(interval);
-      activeThreads.delete(threadID);
-      return;
+  const targetID = Object.keys(mentions)[0];
+  const targetName = mentions[targetID];
+  let index = 0;
+
+  activeFungalis[threadID] = setInterval(() => {
+    if (index >= fungaliList.length) {
+      clearInterval(activeFungalis[threadID]);
+      delete activeFungalis[threadID];
+      return api.sendMessage(`😈 গালি শেষ হলো! ${targetName} ভাইয়ে পাঠানো হলো!`, threadID);
     }
 
-    api.sendMessage(
-      `@${mentionName} ${fungaliList[count]}`,
-      threadID,
-      null,
-      { mentions: [{ tag: mentionName, id: mentionID }] }
-    );
-    count++;
-  }, 300);
+    api.sendMessage({
+      body: `😡 @${targetName} ${fungaliList[index]}`,
+      mentions: [{ tag: targetName, id: targetID }]
+    }, threadID);
 
-  activeThreads.set(threadID, interval);
+    index++;
+  }, 300); // প্রতি 0.3 সেকেন্ডে মেসেজ যাবে
 };
